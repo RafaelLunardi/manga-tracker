@@ -20,14 +20,41 @@ def unique_sorted(nums: List[int]) -> List[int]:
 def fetch_numbers(url: str) -> List[int]:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
-        page.goto(url, wait_until="domcontentloaded", timeout=120000)
-        page.wait_for_timeout(2000)  # 2s pra terminar de renderizar
-        text = page.inner_text("body")
-        browser.close()
+        context = browser.new_context()
+        page = context.new_page()
 
-    nums = [int(m.group(1)) for m in NUM_RE.finditer(text)]
-    return unique_sorted(nums)
+        # Acelera MUITO: não baixa imagens nem fontes
+        page.route(
+            "**/*",
+            lambda route: route.abort()
+            if route.request.resource_type in ["image", "font"]
+            else route.continue_()
+        )
+
+        last_err = None
+        for attempt in range(3):
+            try:
+                # 'commit' não fica esperando o site "terminar"
+                page.goto(url, wait_until="commit", timeout=180000)
+
+                # Espera o body existir (critério simples e confiável)
+                page.wait_for_selector("body", timeout=180000)
+
+                # dá um tempo pro conteúdo renderizar
+                page.wait_for_timeout(2500)
+
+                text = page.inner_text("body")
+                nums = [int(m.group(1)) for m in NUM_RE.finditer(text)]
+
+                browser.close()
+                return unique_sorted(nums)
+
+            except Exception as e:
+                last_err = e
+                page.wait_for_timeout(2000)
+
+        browser.close()
+        raise last_err
 
 # =========================
 # Notion API
