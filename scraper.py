@@ -113,6 +113,24 @@ def notion_update_page(page_id: str, props: Dict[str, Any]) -> None:
 def to_rich_text(s: str) -> Dict[str, Any]:
     return {"rich_text": [{"text": {"content": s}}]}
 
+def format_ranges(nums: List[int]) -> str:
+    """Converte [1,2,3,7,8,10] -> '1–3, 7–8, 10' """
+    if not nums:
+        return ""
+    nums = sorted(nums)
+    parts: List[str] = []
+    start = prev = nums[0]
+
+    for n in nums[1:]:
+        if n == prev + 1:
+            prev = n
+            continue
+        parts.append(f"{start}" if start == prev else f"{start}–{prev}")
+        start = prev = n
+
+    parts.append(f"{start}" if start == prev else f"{start}–{prev}")
+    return ", ".join(parts)
+
 def main() -> None:
     mangas = json.loads(Path("mangas.json").read_text(encoding="utf-8"))
     results: Dict[str, Any] = {}
@@ -140,23 +158,25 @@ def main() -> None:
                 print(f"⚠️ Notion: não achei nenhuma linha com URL == '{url}' (coluna URL).")
             else:
                 status_txt = "OK" if len(faltantes) == 0 else "❌ Faltam volumes"
+                faltantes_txt = format_ranges(faltantes)
 
                 props = {
                     "URL": {"url": url},
 
-                    # ✅ Pelo erro do Notion: "Faltantes is expected to be number"
+                    # ✅ Sua coluna "Faltantes" é número (quantidade)
                     "Faltantes": {"number": len(faltantes)},
 
-                    # ✅ continua útil (se existir como Number)
+                    # ✅ mantém também (se existir como Number)
                     "Qtde faltante": {"number": len(faltantes)},
 
-                    # ✅ Pelo erro do Notion: "Última verificação is expected to be rich_text"
-                    "Última verificação": to_rich_text(datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")),
+                    # ✅ NOVA coluna com a lista de volumes faltantes (texto)
+                    "Volumes faltantes": to_rich_text(faltantes_txt),
 
-                    # ✅ Pelo erro do Notion: "Status is expected to be rich_text"
+                    # ✅ Texto (rich_text)
+                    "Última verificação": to_rich_text(datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")),
                     "Status": to_rich_text(status_txt),
 
-                    # Se essas colunas existirem como texto, vai preencher também:
+                    # Texto (se existirem)
                     "Tenho": to_rich_text(", ".join(map(str, tenho))),
                     "Existentes": to_rich_text(", ".join(map(str, existentes))),
                 }
