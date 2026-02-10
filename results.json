@@ -56,5 +56,37 @@
       24
     ],
     "faltam_qtd": 1
+  },
+  "Zom 100 - Coisas para fazer antes de virar zumbi": {
+    "url": "https://editorajbc.com.br/mangas/colecao/zom-100-coisas-para-fazer-antes-de-virar-zumbi/",
+    "tenho": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "existentes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "faltantes": [
+      9,
+      10,
+      11
+    ],
+    "faltam_qtd": 3
   }
 }
