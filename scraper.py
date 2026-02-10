@@ -32,8 +32,16 @@ def fetch_numbers(url: str) -> List[int]:
 # =========================
 # Notion API
 # =========================
+def normalize_notion_id(raw: str) -> str:
+    raw = (raw or "").strip()
+    raw = raw.replace("-", "")
+    # Se vier com 32 chars, transforma em UUID com hífens (8-4-4-4-12)
+    if len(raw) == 32:
+        return f"{raw[0:8]}-{raw[8:12]}-{raw[12:16]}-{raw[16:20]}-{raw[20:32]}"
+    return raw
+
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
-DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
+DATABASE_ID = normalize_notion_id(os.getenv("NOTION_DATABASE_ID"))
 
 NOTION_HEADERS = {
     "Authorization": f"Bearer {NOTION_TOKEN}" if NOTION_TOKEN else "",
@@ -54,6 +62,12 @@ def notion_query_page_id_by_title(title: str) -> Optional[str]:
         }
     }
     r = requests.post(url, headers=NOTION_HEADERS, json=payload, timeout=30)
+
+    # ✅ Mostra o erro real do Notion no log (pra não ficar só "400 Bad Request")
+    if not r.ok:
+        print("Notion error status:", r.status_code)
+        print("Notion error body:", r.text)
+
     r.raise_for_status()
     results = r.json().get("results", [])
     return results[0]["id"] if results else None
@@ -61,6 +75,11 @@ def notion_query_page_id_by_title(title: str) -> Optional[str]:
 def notion_update_page(page_id: str, props: Dict[str, Any]) -> None:
     url = f"https://api.notion.com/v1/pages/{page_id}"
     r = requests.patch(url, headers=NOTION_HEADERS, json={"properties": props}, timeout=30)
+
+    if not r.ok:
+        print("Notion update error status:", r.status_code)
+        print("Notion update error body:", r.text)
+
     r.raise_for_status()
 
 def to_rich_text(s: str) -> Dict[str, Any]:
