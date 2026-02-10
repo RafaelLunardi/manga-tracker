@@ -92,7 +92,6 @@ def notion_query_page_id_by_url(url_value: str) -> Optional[str]:
     }
     r = requests.post(url, headers=NOTION_HEADERS, json=payload, timeout=30)
 
-    # ✅ Mostra o erro real do Notion no log (pra não ficar só "400 Bad Request")
     if not r.ok:
         print("Notion error status:", r.status_code)
         print("Notion error body:", r.text)
@@ -140,15 +139,28 @@ def main() -> None:
             if not page_id:
                 print(f"⚠️ Notion: não achei nenhuma linha com URL == '{url}' (coluna URL).")
             else:
+                status_txt = "OK" if len(faltantes) == 0 else "❌ Faltam volumes"
+
                 props = {
                     "URL": {"url": url},
+
+                    # ✅ Pelo erro do Notion: "Faltantes is expected to be number"
+                    "Faltantes": {"number": len(faltantes)},
+
+                    # ✅ continua útil (se existir como Number)
+                    "Qtde faltante": {"number": len(faltantes)},
+
+                    # ✅ Pelo erro do Notion: "Última verificação is expected to be rich_text"
+                    "Última verificação": to_rich_text(datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")),
+
+                    # ✅ Pelo erro do Notion: "Status is expected to be rich_text"
+                    "Status": to_rich_text(status_txt),
+
+                    # Se essas colunas existirem como texto, vai preencher também:
                     "Tenho": to_rich_text(", ".join(map(str, tenho))),
                     "Existentes": to_rich_text(", ".join(map(str, existentes))),
-                    "Faltantes": to_rich_text(", ".join(map(str, faltantes))),
-                    "Qtde faltante": {"number": len(faltantes)},
-                    "Última verificação": {"date": {"start": datetime.utcnow().isoformat()}},
-                    "Status": {"select": {"name": "OK" if len(faltantes) == 0 else "❌ Faltam volumes"}},
                 }
+
                 notion_update_page(page_id, props)
 
     # Arquivos no repo (continua como antes)
