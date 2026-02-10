@@ -79,13 +79,15 @@ NOTION_HEADERS = {
 def notion_enabled() -> bool:
     return bool(NOTION_TOKEN and DATABASE_ID)
 
-def notion_query_page_id_by_title(title: str) -> Optional[str]:
-    """Busca a página (linha) na database onde a propriedade 'Mangá' (title) == title."""
+def notion_query_page_id_by_url(url_value: str) -> Optional[str]:
+    """Busca a página (linha) na database onde a propriedade 'URL' == url_value."""
     url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
     payload = {
         "filter": {
-            "property": "Mangá",
-            "title": {"equals": title}
+            "property": "URL",
+            "url": {
+                "equals": url_value
+            }
         }
     }
     r = requests.post(url, headers=NOTION_HEADERS, json=payload, timeout=30)
@@ -134,9 +136,9 @@ def main() -> None:
 
         # Atualiza Notion (se secrets estiverem configurados)
         if notion_enabled():
-            page_id = notion_query_page_id_by_title(nome)
+            page_id = notion_query_page_id_by_url(url)
             if not page_id:
-                print(f"⚠️ Notion: não achei o mangá '{nome}' na database (coluna Mangá).")
+                print(f"⚠️ Notion: não achei nenhuma linha com URL == '{url}' (coluna URL).")
             else:
                 props = {
                     "URL": {"url": url},
