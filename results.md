@@ -7,5 +7,5 @@
 
 ## Zom 100 - Coisas para fazer antes de virar zumbi
 - Tenho: [1, 2, 3, 4, 5, 6, 7, 8]
-- Existentes na página: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 24]
-- ❌ Faltantes (4): [9, 10, 11, 24]
+- Existentes na página: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+- ❌ Faltantes (3): [9, 10, 11]
