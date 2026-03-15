@@ -50,16 +50,12 @@
       21,
       22,
       23,
-      24,
-      30,
-      31
+      24
     ],
     "faltantes": [
-      24,
-      30,
-      31
+      24
     ],
-    "faltam_qtd": 3
+    "faltam_qtd": 1
   },
   "Zom 100 - Coisas para fazer antes de virar zumbi": {
     "url": "https://editorajbc.com.br/mangas/colecao/zom-100-coisas-para-fazer-antes-de-virar-zumbi/",
@@ -85,18 +81,14 @@
       9,
       10,
       11,
-      17,
-      18,
-      31
+      17
     ],
     "faltantes": [
       9,
       10,
       11,
-      17,
-      18,
-      31
+      17
     ],
-    "faltam_qtd": 6
+    "faltam_qtd": 4
   }
 }
